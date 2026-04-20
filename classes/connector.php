@@ -35,17 +35,25 @@ use Psr\Http\Message\StreamInterface;
 class connector extends \local_ai_manager\base_connector {
     #[\Override]
     public function get_models_by_purpose(): array {
-        $genericopenaimodels = ['gpt-3.5-turbo', 'gpt-4-turbo', 'gpt-4o', 'gpt-4o-mini', 'o1', 'o1-mini', 'o3', 'o3-mini', 'o4-mini'];
+        global $DB;
+        $knownmodels = [
+            'gpt-3.5-turbo', 'gpt-4-turbo', 'gpt-4o', 'gpt-4o-mini', 'o1', 'o1-mini', 'o3', 'o3-mini', 'o4-mini',
+        ];
+        $savedmodels = $DB->get_fieldset_select(
+            'local_ai_manager_instance', 'model', 'connector = ?', ['genericopenai']
+        );
+        $allmodels = array_unique(array_merge($knownmodels, array_filter($savedmodels)));
+
         return [
-            'chat' => $genericopenaimodels,
-            'feedback' => $genericopenaimodels,
-            'singleprompt' => $genericopenaimodels,
-            'translate' => $genericopenaimodels,
+            'chat' => $allmodels,
+            'feedback' => $allmodels,
+            'singleprompt' => $allmodels,
+            'translate' => $allmodels,
             'tts' => [],
             'imggen' => [],
-            'itt' => ['gpt-4-turbo', 'gpt-4o', 'gpt-4o-mini', 'o1', 'o3', 'o4-mini'],
-            'questiongeneration' => $genericopenaimodels,
-            'agent' => $genericopenaimodels,
+            'itt' => $allmodels,
+            'questiongeneration' => $allmodels,
+            'agent' => $allmodels,
         ];
     }
 
